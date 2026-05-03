@@ -20,3 +20,4 @@ pnpm-debug.log*
 
 # Future nuxt upgrade
 .nuxt
+/dist
