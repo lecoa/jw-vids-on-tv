@@ -2,8 +2,7 @@
   <v-row v-if="category" justify="center">
     <v-col sm="12" xl="8" cols="12">
       <p v-if="!hideTitle" class="text-h4 font-weight-medium mb-6" v-text="category.name"></p>
-      <VideoGrid v-if="grid" :videos="media"></VideoGrid>
-      <VideoSwiper v-else :videos="media"></VideoSwiper>
+      <VideoGrid :videos="media"></VideoGrid>
       <v-divider v-if="divider" :class="grid ? 'mt-8' : 'mt-5'"></v-divider>
     </v-col>
   </v-row>

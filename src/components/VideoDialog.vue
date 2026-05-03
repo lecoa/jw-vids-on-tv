@@ -4,28 +4,9 @@
     @click:outside="dialog = false"
     max-width="900px"
     transition="dialog-bottom-transition"
-    :fullscreen="$vuetify.breakpoint.smAndDown"
+    fullscreen
   >
     <v-card v-if="selectedVideo">
-      <v-toolbar dense>
-        <v-toolbar-title v-if="selectedVideo" style="word-break: normal; user-select: none">
-          {{ `${selectedVideo.title} (${selectedVideo.durationFormattedHHMM})` }}
-        </v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn icon :href="jwOrgUrl" target="_blank" v-bind="attrs" v-on="on">
-                <v-icon>mdi-open-in-new</v-icon>
-              </v-btn>
-            </template>
-            <span v-text="translations.lnkHome"></span>
-          </v-tooltip>
-          <v-btn icon @click="dialog = false">
-            <v-icon>mdi-close</v-icon>
-          </v-btn>
-        </v-toolbar-items>
-      </v-toolbar>
       <v-responsive v-if="loading || !videoMedia" :aspect-ratio="16 / 9" key="loading">
         <v-container fill-height fluid>
           <v-row justify="center">
@@ -35,13 +16,14 @@
           </v-row>
         </v-container>
       </v-responsive>
-      <v-responsive v-else-if="videoMedia" :aspect-ratio="16 / 9" key="video">
+      <v-responsive v-else-if="videoMedia" style="height: 100vh; width: 100vw" key="video">
         <video
           id="player"
           controls
           crossorigin
           playsinline
           :poster="videoPoster"
+          autoplay
           style="width: 100%; height: 100%; object-fit: cover"
         >
           <source
@@ -70,54 +52,6 @@
           Your browser does not support the video tag.
         </video>
       </v-responsive>
-      <v-card-text class="px-3 pb-3">
-        <v-container>
-          <v-row :no-gutters="xsOnly">
-            <v-col cols="12" sm="6">
-              <v-autocomplete
-                ref="vidLangSelect"
-                v-model="videoLanguage"
-                :items="availableLanguages"
-                class="mt-4"
-                hide-details
-                prepend-icon="mdi-volume-high"
-                :item-text="languageLabel"
-                item-value="locale"
-                outlined
-                dense
-              ></v-autocomplete>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <v-autocomplete
-                ref="subLangSelect"
-                v-model="subtitleLanguage"
-                :items="availableLanguages"
-                class="mt-4"
-                hide-details
-                prepend-icon="mdi-subtitles"
-                :item-text="languageLabel"
-                item-value="locale"
-                outlined
-                dense
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
-        </v-container>
-        <!-- Button components use v-bind as props are the same name as the variables -->
-        <!-- For mobile -->
-        <v-card-actions v-if="xsOnly">
-          <CastButton v-bind="{ videoMedia, subtitleMedia, subtitleUrl }"></CastButton>
-        </v-card-actions>
-        <v-card-actions>
-          <!-- For non-mobile -->
-          <template v-if="!xsOnly">
-            <CastButton v-bind="{ videoMedia, subtitleMedia, subtitleUrl }"></CastButton>
-            <v-spacer></v-spacer>
-          </template>
-          <VideoButton v-bind="{ videoMedia }"></VideoButton>
-          <SubtitleButton v-bind="{ subtitleMedia, subtitleUrl }"></SubtitleButton>
-        </v-card-actions>
-      </v-card-text>
     </v-card>
   </v-dialog>
 </template>
@@ -129,6 +63,7 @@ import { Getter, Mutation, State } from 'vuex-class';
 
 // @ts-ignore
 import Plyr, { Track } from 'plyr';
+
 import { Language, Video } from '@/types';
 
 import CastButton from './button/CastButton.vue';
@@ -287,6 +222,7 @@ export default class VideoDialog extends Vue {
         })) ?? [],
       tracks,
     };
+    this.player.fullscreen.enter();
   }
 
   async loadMediaItems() {
@@ -368,6 +304,7 @@ export default class VideoDialog extends Vue {
   height: 100%;
   --plyr-font-size-xlarge: 36px;
   --plyr-font-size-large: 22px;
+  --plyr-color-main: #4aa750;
 }
 
 .plyr__poster {
