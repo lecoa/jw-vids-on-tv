@@ -64,7 +64,7 @@
                   class="white--text align-end"
                   gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                 >
-                  <v-card-title style="word-break: normal; user-select: none;">
+                  <v-card-title style="word-break: normal; user-select: none">
                     {{ result.title }}
                   </v-card-title>
                 </v-img>
@@ -172,9 +172,9 @@ export default class SearchDialog extends Vue {
     if (!this.response?.sorts) {
       return [];
     }
-    return this.sortKeys.map(key => ({
+    return this.sortKeys.map((key) => ({
       key,
-      label: this.response?.sorts.find(sort => sort.link.includes(key))?.label,
+      label: this.response?.sorts.find((sort) => sort.link.includes(key))?.label,
     }));
   }
 
@@ -207,7 +207,8 @@ export default class SearchDialog extends Vue {
     const wtLocaleRegex = /wtlocale=(?<code>[A-Za-z]+)/;
     const localeRegex = /locale=(?<locale>[A-Za-z]+)/;
     const lankRegex = /lank=(?<lank>[\w-]+)/;
-    const mediaItemsRegex = /jw\.org\/[\w-]+\/.+#(?<locale>[\w-]+)\/mediaitems\/(?<category>[\w-]+)\/(?<lank>[\w-]+)/;
+    const mediaItemsRegex =
+      /jw\.org\/[\w-]+\/.+#(?<locale>[\w-]+)\/mediaitems\/(?<category>[\w-]+)\/(?<lank>[\w-]+)/;
 
     if (finderRegex.test(value)) {
       const lang =
@@ -259,7 +260,7 @@ export default class SearchDialog extends Vue {
     try {
       const response = await axios.get<SearchResponse>(url, config);
       response.data.results = response.data.results.filter(
-        result => result.subtype !== 'videoCategory',
+        (result) => result.subtype !== 'videoCategory',
       );
       this.response = response.data;
     } catch (error) {

@@ -66,11 +66,12 @@ Als je de site zelf wilt bouwen, doe je dat zo:
 ```
 git clone https://github.com/semkeijsper/jw-cast.git
 cd jw-cast
-yarn install
-yarn build
+npm install
+npm run build
 ```
 
-Wil je de site op localhost starten, gebruik dan `yarn serve` in plaats van `yarn build`.
+Wil je de site op localhost starten, gebruik dan `npm run dev`.
+Als je liever de Vue CLI naam gebruikt, werkt `npm run serve` hetzelfde.
 
 De site is gehost op GitHub Pages, de bestanden zijn te vinden in de branch `gh-pages`.
 

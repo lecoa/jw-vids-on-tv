@@ -10,12 +10,12 @@ The user-facing language is Dutch by default. The README and in-app guide button
 
 ## Commands
 
-Package manager is **Yarn 3 (Berry)** pinned via `.yarnrc.yml` to `.yarn/releases/yarn-3.4.1.cjs`. Use `yarn`, not `npm`.
+Package manager is **npm**.
 
-- `yarn install` — install dependencies
-- `yarn serve` — run the dev server (Vue CLI / webpack)
-- `yarn build` — production build into `dist/`
-- `yarn lint` — ESLint (airbnb + TypeScript + Vue + prettier)
+- `npm install` — install dependencies
+- `npm run serve` — run the dev server (Vue CLI / webpack)
+- `npm run build` — production build into `dist/`
+- `npm run lint` — ESLint (airbnb + TypeScript + Vue + prettier)
 
 There is no test suite configured.
 
@@ -27,7 +27,7 @@ Hosted on GitHub Pages from the `gh-pages` branch. Deploy is a manual subtree pu
 git subtree push --prefix dist origin gh-pages
 ```
 
-The custom domain (`public/CNAME`) is `jwcast.semdev.nl`. The build commits `dist/` into the repo — be aware that `yarn build` will produce diff noise there.
+The custom domain (`public/CNAME`) is `jwcast.semdev.nl`. The build commits `dist/` into the repo — be aware that `npm run build` will produce diff noise there.
 
 ## Architecture
 
@@ -72,7 +72,7 @@ The Chromecast button hands off to `https://chromecast.smplayer.info` by base64-
 - **TypeScript + class components.** Every `.vue` file uses `<script lang="ts">` with `vue-property-decorator` (`@Component`, `@Prop`, `@Watch`) and `vuex-class` (`@State`, `@Getter`, `@Mutation`). Match this style; don't introduce the Composition API or `defineComponent`.
 - **Path alias `@/`** maps to `src/` (see `tsconfig.json`). Use it for cross-directory imports.
 - **Strict TS** is on. Use the `!` non-null assertion on injected store members as existing components do (e.g. `@State mediatorUrl!: string`).
-- **Formatting**: Prettier (`singleQuote`, `trailingComma: all`, `printWidth: 100`, `semi`). ESLint extends `@vue/airbnb` + `@vue/typescript` + `prettier`. Run `yarn lint` before committing.
+- **Formatting**: Prettier (`singleQuote`, `trailingComma: all`, `printWidth: 100`, `semi`). ESLint extends `@vue/airbnb` + `@vue/typescript` + `prettier`. Run `npm run lint` before committing.
 - **Vuetify 2** for all UI; **Material Design Icons** (`mdi-*`) for icons. The single theme color is `primary: #4a6da7` (`src/plugins/vuetify.ts`); dark mode follows `prefers-color-scheme`.
 - **i18n strings** come from the jw.org translations endpoint and are read off `state.translations` (e.g. `translations.lnkSearch`). Don't hardcode user-facing strings — fall back to a hardcoded Dutch/English pair only where the translation key isn't yet loaded (see `guideButtonText` in `App.vue`).
 - **No state mutations outside mutations.** Components call mutations like `setSelectedVideo`, never assign to `state` directly.

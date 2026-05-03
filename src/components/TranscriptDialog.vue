@@ -66,7 +66,7 @@ export default class TranscriptDialog extends Vue {
   }
 
   get subtitleUrl() {
-    const found = this.subtitleMedia?.files.find(file => file?.subtitles?.url !== undefined);
+    const found = this.subtitleMedia?.files.find((file) => file?.subtitles?.url !== undefined);
     if (found === undefined) return null;
     return found.subtitles.url;
   }
@@ -106,8 +106,8 @@ export default class TranscriptDialog extends Vue {
 
     let lines = vtt.split('\n');
     lines.splice(0, 2);
-    lines = lines.map(line => line.trim());
-    lines = lines.filter(line => line.length > 0);
+    lines = lines.map((line) => line.trim());
+    lines = lines.filter((line) => line.length > 0);
     lines = lines.filter((line, index, total) => line !== total[index + 1]);
 
     // TODO: solve text being cut off

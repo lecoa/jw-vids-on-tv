@@ -41,22 +41,22 @@ const state: State = {
 };
 
 const getters: GetterTree<State, any> = {
-  getSiteLanguage: state => {
+  getSiteLanguage: (state) => {
     const language = state.siteLanguage;
-    return state.languages.find(l => l.locale === language);
+    return state.languages.find((l) => l.locale === language);
   },
-  getVideoLanguage: state => {
+  getVideoLanguage: (state) => {
     const language = state.videoLanguage;
-    return state.languages.find(l => l.locale === language);
+    return state.languages.find((l) => l.locale === language);
   },
-  getSubtitleLanguage: state => {
+  getSubtitleLanguage: (state) => {
     const language = state.subtitleLanguage;
-    return state.languages.find(l => l.locale === language);
+    return state.languages.find((l) => l.locale === language);
   },
-  findLanguageByCode: state => (code: string | undefined) =>
-    state.languages.find(language => language.code === code),
-  findLanguageByLocale: state => (locale: string | undefined) =>
-    state.languages.find(language => language.locale === locale?.replace('-', '_')),
+  findLanguageByCode: (state) => (code: string | undefined) =>
+    state.languages.find((language) => language.code === code),
+  findLanguageByLocale: (state) => (locale: string | undefined) =>
+    state.languages.find((language) => language.locale === locale?.replace('-', '_')),
 };
 
 const mutations: MutationTree<State> = {

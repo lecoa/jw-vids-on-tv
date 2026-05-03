@@ -66,12 +66,11 @@ import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Getter, Mutation, State } from 'vuex-class';
 
-import { Language, Translations } from './types';
-
 import VideoDialog from '@/components/VideoDialog.vue';
 import SearchDialog from '@/components/SearchDialog.vue';
 import VideoCategory from '@/components/VideoCategory.vue';
 import TranscriptDialog from '@/components/TranscriptDialog.vue';
+import { Language, Translations } from './types';
 
 @Component({
   components: {
@@ -84,7 +83,7 @@ import TranscriptDialog from '@/components/TranscriptDialog.vue';
 export default class App extends Vue {
   ready: boolean = false;
 
-  @State(state => state.route.params.language) routeLanguage!: string;
+  @State((state) => state.route.params.language) routeLanguage!: string;
 
   @State mediatorUrl!: string;
   @State languages!: Language[];
@@ -144,7 +143,7 @@ export default class App extends Vue {
 
   @Watch('routeLanguage')
   async onRouteLanguageChange(newLang: string) {
-    if (!this.languages.some(language => language.locale === newLang)) {
+    if (!this.languages.some((language) => language.locale === newLang)) {
       this.siteLanguage = 'en';
       this.updateRoute();
       return;
@@ -171,10 +170,10 @@ export default class App extends Vue {
     const { languages } = (await axios.get<LanguagesRequest>(url)).data;
 
     // Pinning items to the top of a list has never been harder
-    const dutch = languages.filter(language => language.locale === 'nl')[0];
-    const english = languages.filter(language => language.locale === 'en')[0];
+    const dutch = languages.filter((language) => language.locale === 'nl')[0];
+    const english = languages.filter((language) => language.locale === 'en')[0];
     const remainder = languages.filter(
-      language => language.locale !== 'nl' && language.locale !== 'en',
+      (language) => language.locale !== 'nl' && language.locale !== 'en',
     );
     remainder.unshift(dutch, english);
     this.setLanguages(remainder);

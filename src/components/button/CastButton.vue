@@ -10,9 +10,7 @@
             class="mr-2"
             :loading="!videoMedia || !subtitleMedia"
           >
-            <v-icon left>
-              mdi-cast
-            </v-icon>
+            <v-icon left> mdi-cast </v-icon>
             {{ translations.btnPlay }}
           </v-btn>
         </template>
@@ -21,7 +19,7 @@
     </template>
     <v-list dense v-if="videoMedia">
       <v-list-item
-        v-for="file in videoMedia.files.filter(f => f.label !== '144p')"
+        v-for="file in videoMedia.files.filter((f) => f.label !== '144p')"
         :key="file.checksum"
         :href="getChromecastUrl(file)"
         target="_blank"

@@ -8,7 +8,7 @@
           class="white--text align-end"
           gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
         >
-          <v-card-title style="word-break: normal; user-select: none;">
+          <v-card-title style="word-break: normal; user-select: none">
             {{ video.title }}
           </v-card-title>
         </v-img>

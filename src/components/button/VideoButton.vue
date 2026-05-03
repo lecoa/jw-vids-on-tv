@@ -2,16 +2,14 @@
   <v-menu offset-y rounded="0" transition="slide-y-transition">
     <template v-slot:activator="{ attrs, on }">
       <v-btn color="primary" v-bind="attrs" v-on="on" class="mr-2" :loading="!videoMedia">
-        <v-icon left>
-          mdi-download
-        </v-icon>
+        <v-icon left> mdi-download </v-icon>
         {{ translations.btnSearchFilterVideo }}
       </v-btn>
     </template>
 
     <v-list dense v-if="videoMedia">
       <v-list-item
-        v-for="file in videoMedia.files.filter(f => f.label !== '144p')"
+        v-for="file in videoMedia.files.filter((f) => f.label !== '144p')"
         :key="file.checksum"
         :href="file.progressiveDownloadURL"
       >

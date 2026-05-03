@@ -9,9 +9,7 @@
         :loading="!subtitleMedia"
         :disabled="subtitleUrl === null"
       >
-        <v-icon left>
-          mdi-download
-        </v-icon>
+        <v-icon left> mdi-download </v-icon>
         {{ translations.hdgSubtitles }}
       </v-btn>
     </template>

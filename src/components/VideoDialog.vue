@@ -8,7 +8,7 @@
   >
     <v-card v-if="selectedVideo">
       <v-toolbar dense>
-        <v-toolbar-title v-if="selectedVideo" style="word-break: normal; user-select: none;">
+        <v-toolbar-title v-if="selectedVideo" style="word-break: normal; user-select: none">
           {{ `${selectedVideo.title} (${selectedVideo.durationFormattedHHMM})` }}
         </v-toolbar-title>
         <v-spacer></v-spacer>
@@ -42,7 +42,7 @@
           crossorigin
           playsinline
           :poster="videoPoster"
-          style="width: 100%; height: 100%; object-fit: cover;"
+          style="width: 100%; height: 100%; object-fit: cover"
         >
           <source
             v-for="file in videoMedia.files.slice().reverse()"
@@ -188,13 +188,13 @@ export default class VideoDialog extends Vue {
   }
 
   get captionUrl() {
-    const found = this.videoMedia?.files.find(file => file?.subtitles?.url !== undefined);
+    const found = this.videoMedia?.files.find((file) => file?.subtitles?.url !== undefined);
     if (found === undefined) return null;
     return found.subtitles.url;
   }
 
   get subtitleUrl() {
-    const found = this.subtitleMedia?.files.find(file => file?.subtitles?.url !== undefined);
+    const found = this.subtitleMedia?.files.find((file) => file?.subtitles?.url !== undefined);
     if (found === undefined) return null;
     return found.subtitles.url;
   }
@@ -203,7 +203,7 @@ export default class VideoDialog extends Vue {
     if (!this.selectedVideo) {
       return [];
     }
-    return this.languages.filter(language =>
+    return this.languages.filter((language) =>
       this.selectedVideo.availableLanguages.includes(language.code),
     );
   }
@@ -280,7 +280,7 @@ export default class VideoDialog extends Vue {
       poster: this.videoPoster,
       title: this.selectedVideo.title,
       sources:
-        this.videoMedia?.files.map(file => ({
+        this.videoMedia?.files.map((file) => ({
           src: file.progressiveDownloadURL,
           type: file.mimetype,
           size: parseInt(file.label.slice(0, -1), 10),

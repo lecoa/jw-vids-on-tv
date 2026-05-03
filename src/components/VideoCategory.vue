@@ -69,7 +69,7 @@ export default class VideoCategory extends Vue {
     if (this.filter === undefined) {
       return this.category?.media;
     }
-    return this.category?.media.filter(medium =>
+    return this.category?.media.filter((medium) =>
       this.filter?.test(medium.languageAgnosticNaturalKey),
     );
   }
