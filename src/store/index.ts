@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-shadow */
 import Vue from 'vue';
 import Vuex, { GetterTree, MutationTree } from 'vuex';
+import VueCookies from 'vue-cookies';
 
 import { State } from '@/types/store';
 
+const COOKIE_VIDEO_LANG = 'jw_videoLanguage';
+const COOKIE_SUBTITLE_LANG = 'jw_subtitleLanguage';
+
 Vue.use(Vuex);
+Vue.use(VueCookies, { expires: '1y' });
 
 const state: State = {
   mediatorUrl: `https://b.jw-cdn.org/apis/mediator/v1`,
@@ -26,8 +31,8 @@ const state: State = {
   ],
   translations: {},
   siteLanguage: 'nl',
-  videoLanguage: 'en',
-  subtitleLanguage: 'nl',
+  videoLanguage: (Vue.$cookies.get(COOKIE_VIDEO_LANG) as string) || 'en',
+  subtitleLanguage: (Vue.$cookies.get(COOKIE_SUBTITLE_LANG) as string) || 'nl',
   searchDialog: false,
   videoDialog: false,
   transcriptDialog: false,
@@ -66,9 +71,11 @@ const mutations: MutationTree<State> = {
   },
   setVideoLanguage(state, value) {
     state.videoLanguage = value;
+    Vue.$cookies.set(COOKIE_VIDEO_LANG, value);
   },
   setSubtitleLanguage(state, value) {
     state.subtitleLanguage = value;
+    Vue.$cookies.set(COOKIE_SUBTITLE_LANG, value);
   },
   setSearchDialog(state, value) {
     state.searchDialog = value;
