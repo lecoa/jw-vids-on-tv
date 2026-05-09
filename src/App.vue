@@ -12,11 +12,11 @@
                 </v-btn>
                 <v-autocomplete
                   ref="langSelect"
-                  v-model="subtitleLanguage"
+                  v-model="siteLanguage"
                   :items="languages"
                   class="tv-language"
                   hide-details
-                  prepend-icon="mdi-subtitles"
+                  prepend-icon="mdi-language"
                   :item-text="languageLabel"
                   item-value="locale"
                   outlined
@@ -134,8 +134,7 @@ export default class App extends Vue {
 
   async mounted() {
     this.$vuetify.theme.dark = true;
-    this.setSiteLanguage(this.preferredSiteLanguage);
-    this.setVideoLanguage(this.preferredSiteLanguage);
+    this.setVideoLanguage('en');
     await this.fetchLanguages();
     this.ready = true;
     await this.fetchI18n();
@@ -159,7 +158,7 @@ export default class App extends Vue {
   updateRoute() {
     this.$router.push({
       name: 'Home',
-      params: { language: this.preferredSiteLanguage },
+      params: { language: this.siteLanguage },
       query: this.$route.query,
     });
   }
@@ -269,11 +268,14 @@ export default class App extends Vue {
 
   openVideo(video: Video) {
     this.setSelectedVideo(video);
+    // When opening a video: set video language to English and subtitles to site language
+    this.setVideoLanguage('en');
+    this.setSubtitleLanguage(this.siteLanguage);
 
     if (this.routeVideoKey !== video.languageAgnosticNaturalKey) {
       this.$router.push({
         name: 'Home',
-        params: { language: this.preferredSiteLanguage },
+        params: { language: this.siteLanguage },
         query: { video: video.languageAgnosticNaturalKey },
       });
     }
@@ -308,6 +310,29 @@ export default class App extends Vue {
       !this.videoDialog
     ) {
       this.setVideoDialog(true);
+      return;
+    }
+
+    // If video not found in main feed, try to fetch it from the API (e.g., from search results)
+    if (
+      this.selectedVideo === null ||
+      this.selectedVideo.languageAgnosticNaturalKey !== this.routeVideoKey
+    ) {
+      this.fetchVideoByKey(this.routeVideoKey);
+    }
+  }
+
+  async fetchVideoByKey(languageAgnosticNaturalKey: string) {
+    try {
+      const url = `${this.mediatorUrl}/media-items/${this.getSiteLanguage.code}/${languageAgnosticNaturalKey}?clientType=www`;
+      const response = await axios.get(url);
+      const [video] = response.data.media;
+      if (video) {
+        this.setSelectedVideo(video);
+        this.setVideoDialog(true);
+      }
+    } catch (error) {
+      // Video not found or error fetching - silently fail
     }
   }
 
@@ -402,8 +427,8 @@ export default class App extends Vue {
 
   @Watch('routeLanguage')
   onRouteLanguageChange(newLang: string) {
-    if (newLang !== this.preferredSiteLanguage) {
-      this.updateRoute();
+    if (newLang && newLang !== this.siteLanguage) {
+      this.setSiteLanguage(newLang);
     }
   }
 
@@ -412,9 +437,12 @@ export default class App extends Vue {
     this.syncVideoDialogWithRoute();
   }
 
-  @Watch('subtitleLanguage')
-  onSubtitleLanguageChange() {
+  @Watch('siteLanguage')
+  onSiteLanguageChange() {
     (this.$refs.langSelect as { blur?: () => void } | undefined)?.blur?.();
+    this.updateRoute();
+    this.fetchI18n();
+    this.fetchLatestVideos();
   }
 
   async fetchI18n() {
@@ -457,7 +485,7 @@ export default class App extends Vue {
       if (this.routeVideoKey !== null) {
         this.$router.replace({
           name: 'Home',
-          params: { language: this.preferredSiteLanguage },
+          params: { language: this.siteLanguage },
         });
       }
       this.$nextTick(() => this.focusCurrentTile());

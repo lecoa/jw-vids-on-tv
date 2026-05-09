@@ -5,11 +5,21 @@ import VueCookies from 'vue-cookies';
 
 import { State } from '@/types/store';
 
+const COOKIE_SITE_LANG = 'jw_siteLanguage';
 const COOKIE_VIDEO_LANG = 'jw_videoLanguage';
 const COOKIE_SUBTITLE_LANG = 'jw_subtitleLanguage';
 
 Vue.use(Vuex);
 Vue.use(VueCookies, { expires: '1y' });
+
+const getDefaultSiteLanguage = () => {
+  const savedLanguage = Vue.$cookies.get(COOKIE_SITE_LANG) as string | null;
+  if (savedLanguage) {
+    return savedLanguage;
+  }
+  const browserLocale = window.navigator.language.toLowerCase();
+  return browserLocale.startsWith('nl') ? 'nl' : 'en';
+};
 
 const state: State = {
   mediatorUrl: `https://b.jw-cdn.org/apis/mediator/v1`,
@@ -30,9 +40,9 @@ const state: State = {
     },
   ],
   translations: {},
-  siteLanguage: 'nl',
+  siteLanguage: getDefaultSiteLanguage(),
   videoLanguage: (Vue.$cookies.get(COOKIE_VIDEO_LANG) as string) || 'en',
-  subtitleLanguage: (Vue.$cookies.get(COOKIE_SUBTITLE_LANG) as string) || 'nl',
+  subtitleLanguage: (Vue.$cookies.get(COOKIE_SUBTITLE_LANG) as string) || getDefaultSiteLanguage(),
   searchDialog: false,
   videoDialog: false,
   transcriptDialog: false,
@@ -68,6 +78,7 @@ const mutations: MutationTree<State> = {
   },
   setSiteLanguage(state, value) {
     state.siteLanguage = value;
+    Vue.$cookies.set(COOKIE_SITE_LANG, value);
   },
   setVideoLanguage(state, value) {
     state.videoLanguage = value;

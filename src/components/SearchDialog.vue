@@ -240,6 +240,12 @@ export default class SearchDialog extends Vue {
       await axios.get(`${this.mediatorUrl}/media-items/${langCode}/${lank}?clientType=www`)
     ).data.media;
     this.setSelectedVideo(video);
+    this.setSearchDialog(false);
+    this.$router.push({
+      name: 'Home',
+      params: { language: this.siteLanguage },
+      query: { video: video.languageAgnosticNaturalKey },
+    });
     this.setVideoDialog(true);
   }
 
