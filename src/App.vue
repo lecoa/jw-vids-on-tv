@@ -95,6 +95,7 @@ import { Getter, Mutation, State } from 'vuex-class';
 import VideoDialog from '@/components/VideoDialog.vue';
 import SearchDialog from '@/components/SearchDialog.vue';
 import TranscriptDialog from '@/components/TranscriptDialog.vue';
+import { isBackKey, isRemoteNavigationKey } from '@/utils/remote-navigation';
 import { Language, Translations, Video } from './types';
 
 @Component({
@@ -119,6 +120,7 @@ export default class App extends Vue {
   @State translations!: Translations;
   @State videoDialog!: boolean;
   @State searchDialog!: boolean;
+  @State transcriptDialog!: boolean;
   @State selectedVideo!: Video | null;
 
   @Getter getSiteLanguage!: Language;
@@ -130,6 +132,7 @@ export default class App extends Vue {
   @Mutation setLanguages!: (value: Language[]) => void;
   @Mutation setTranslations!: (value: Translations) => void;
   @Mutation setSearchDialog!: (value: boolean) => void;
+  @Mutation setTranscriptDialog!: (value: boolean) => void;
   @Mutation setSelectedVideo!: (value: Video | null) => void;
   @Mutation setVideoDialog!: (value: boolean) => void;
 
@@ -362,11 +365,35 @@ export default class App extends Vue {
   }
 
   onGlobalKeydown(event: KeyboardEvent) {
-    if (this.videoDialog || this.searchDialog || !this.ready) {
+    if (isBackKey(event)) {
+      if (this.transcriptDialog) {
+        this.setTranscriptDialog(false);
+        event.preventDefault();
+        return;
+      }
+
+      if (this.videoDialog) {
+        this.setVideoDialog(false);
+        event.preventDefault();
+        return;
+      }
+
+      if (this.searchDialog) {
+        this.setSearchDialog(false);
+        event.preventDefault();
+        return;
+      }
+
+      this.$router.back();
+      event.preventDefault();
       return;
     }
 
-    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter'].includes(event.key)) {
+    if (this.videoDialog || this.searchDialog || this.transcriptDialog || !this.ready) {
+      return;
+    }
+
+    if (!isRemoteNavigationKey(event)) {
       return;
     }
 
@@ -569,7 +596,6 @@ body {
 .tv-tile {
   border: 2px solid transparent;
   border-radius: 14px;
-  cursor: pointer;
   overflow: hidden;
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }

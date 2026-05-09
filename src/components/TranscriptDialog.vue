@@ -8,7 +8,7 @@
     :fullscreen="$vuetify.breakpoint.smAndDown"
     scrollable
   >
-    <v-card>
+    <v-card ref="dialogCard" @keydown="onRemoteKeydown">
       <v-toolbar color="primary" dark dense class="flex-grow-0">
         <v-toolbar-title>Transcript</v-toolbar-title>
         <v-spacer></v-spacer>
@@ -41,6 +41,12 @@ import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Mutation, State } from 'vuex-class';
 import { Language, Video } from '@/types';
+import {
+  clickActiveElement,
+  focusRelativeElement,
+  isEditableElement,
+  isRemoteNavigationKey,
+} from '@/utils/remote-navigation';
 
 @Component
 export default class TranscriptDialog extends Vue {
@@ -73,6 +79,52 @@ export default class TranscriptDialog extends Vue {
 
   onCopy() {
     navigator.clipboard.writeText(this.subtitles ?? '');
+  }
+
+  get dialogElement() {
+    return this.$refs.dialogCard as HTMLElement | undefined;
+  }
+
+  get firstButton() {
+    return this.dialogElement?.querySelector('button:not([disabled])') as HTMLElement | null;
+  }
+
+  onRemoteKeydown(event: KeyboardEvent) {
+    const dialog = this.dialogElement;
+    if (!dialog) {
+      return;
+    }
+
+    const { activeElement } = document;
+    if (!dialog.contains(activeElement)) {
+      return;
+    }
+
+    if (!isRemoteNavigationKey(event)) {
+      return;
+    }
+
+    if (isEditableElement(activeElement)) {
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      if (activeElement instanceof HTMLTextAreaElement) {
+        this.firstButton?.focus();
+        event.preventDefault();
+        return;
+      }
+
+      if (clickActiveElement(activeElement)) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    const direction: -1 | 1 = event.key === 'ArrowUp' || event.key === 'ArrowLeft' ? -1 : 1;
+    if (focusRelativeElement(dialog, activeElement as HTMLElement | null, direction)) {
+      event.preventDefault();
+    }
   }
 
   @Watch('subtitleUrl')

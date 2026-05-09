@@ -7,9 +7,10 @@
     :fullscreen="$vuetify.breakpoint.smAndDown"
     scrollable
   >
-    <v-card>
+    <v-card ref="dialogCard" @keydown="onRemoteKeydown">
       <v-toolbar color="primary" dark class="flex-grow-0">
         <v-text-field
+          ref="searchInput"
           v-model="query"
           prepend-inner-icon="mdi-magnify"
           :placeholder="placeholder"
@@ -57,7 +58,7 @@
           </v-row>
           <v-row v-if="response">
             <v-col v-for="result in response.results" :key="result.lank" sm="6" lg="4" cols="12">
-              <v-card hover ripple rounded @click="onClickResult(result)">
+              <v-card hover ripple rounded tabindex="0" @click="onClickResult(result)">
                 <v-img
                   :src="result.image.url"
                   :aspect-ratio="2 / 1"
@@ -91,6 +92,13 @@ import axios, { AxiosRequestConfig } from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Getter, Mutation, State } from 'vuex-class';
 import { Language, Result, SearchResponse, Translations, Video } from '@/types';
+import {
+  clickActiveElement,
+  focusRelativeElement,
+  getFocusableElements,
+  isEditableElement,
+  isRemoteNavigationKey,
+} from '@/utils/remote-navigation';
 
 @Component
 export default class SearchDialog extends Vue {
@@ -194,6 +202,89 @@ export default class SearchDialog extends Vue {
 
   async onClickResult(result: Result) {
     this.fetchVideo(this.getSiteLanguage.code, result.lank);
+  }
+
+  get dialogElement() {
+    return this.$refs.dialogCard as HTMLElement | undefined;
+  }
+
+  get searchInputElement() {
+    return this.$el.querySelector('input') as HTMLInputElement | null;
+  }
+
+  get resultCards() {
+    const dialog = this.dialogElement;
+    if (!dialog) {
+      return [];
+    }
+
+    return getFocusableElements(dialog).filter((element) => element.matches('.v-card'));
+  }
+
+  focusSearchInput() {
+    this.searchInputElement?.focus();
+  }
+
+  focusFirstResult() {
+    const firstResult = this.resultCards[0];
+    if (firstResult) {
+      firstResult.focus();
+      return true;
+    }
+
+    return false;
+  }
+
+  onRemoteKeydown(event: KeyboardEvent) {
+    const dialog = this.dialogElement;
+    if (!dialog) {
+      return;
+    }
+
+    const { activeElement } = document;
+    if (!dialog.contains(activeElement)) {
+      return;
+    }
+
+    if (!isRemoteNavigationKey(event)) {
+      return;
+    }
+
+    if (isEditableElement(activeElement)) {
+      if (event.key === 'ArrowDown') {
+        if (this.focusFirstResult()) {
+          event.preventDefault();
+        }
+        return;
+      }
+
+      if (event.key === 'ArrowUp') {
+        this.focusSearchInput();
+        event.preventDefault();
+        return;
+      }
+
+      if (event.key === 'Enter') {
+        if (this.focusFirstResult()) {
+          event.preventDefault();
+        }
+        return;
+      }
+
+      return;
+    }
+
+    if (event.key === 'Enter') {
+      if (clickActiveElement(activeElement)) {
+        event.preventDefault();
+      }
+      return;
+    }
+
+    const direction: -1 | 1 = event.key === 'ArrowUp' || event.key === 'ArrowLeft' ? -1 : 1;
+    if (focusRelativeElement(dialog, activeElement as HTMLElement | null, direction)) {
+      event.preventDefault();
+    }
   }
 
   @Watch('searchQuery')
