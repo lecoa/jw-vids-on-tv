@@ -116,6 +116,18 @@ export default class App extends Vue {
   newestVideos: Video[] = [];
   latestVideosTitle: string = '';
   lastFocusedElement: HTMLElement | null = null;
+  inputMode: 'dpad' | 'pointer' = 'dpad';
+  readonly onWindowKeydown = (event: KeyboardEvent) => {
+    if (this.isRemoteNavigationKey(event)) {
+      this.setInputMode('dpad');
+    }
+
+    this.onGlobalKeydown(event);
+  };
+
+  readonly onWindowPointerActivity = () => {
+    this.setInputMode('pointer');
+  };
 
   @State((state) => state.route.params.language) routeLanguage!: string;
 
@@ -162,13 +174,42 @@ export default class App extends Vue {
     });
     SpatialNavigation.focus(SECTION_MAIN);
 
+    this.setInputMode('dpad');
+
     // Setup global key handler for back button and dialog toggling
-    window.addEventListener('keydown', this.onGlobalKeydown);
+    window.addEventListener('keydown', this.onWindowKeydown);
+    window.addEventListener('mousemove', this.onWindowPointerActivity, { passive: true });
+    window.addEventListener('pointerdown', this.onWindowPointerActivity, { passive: true });
+    window.addEventListener('touchstart', this.onWindowPointerActivity, { passive: true });
   }
 
   beforeDestroy() {
     SpatialNavigation.destroy();
-    window.removeEventListener('keydown', this.onGlobalKeydown);
+    window.removeEventListener('keydown', this.onWindowKeydown);
+    window.removeEventListener('mousemove', this.onWindowPointerActivity);
+    window.removeEventListener('pointerdown', this.onWindowPointerActivity);
+    window.removeEventListener('touchstart', this.onWindowPointerActivity);
+    document.body.classList.remove('tv-input-dpad', 'tv-input-pointer');
+  }
+
+  setInputMode(mode: 'dpad' | 'pointer') {
+    this.inputMode = mode;
+    document.body.classList.toggle('tv-input-dpad', mode === 'dpad');
+    document.body.classList.toggle('tv-input-pointer', mode === 'pointer');
+
+    if (mode === 'pointer' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isRemoteNavigationKey(event: KeyboardEvent) {
+    return (
+      event.key === 'Enter' ||
+      event.key === 'Tab' ||
+      event.key.startsWith('Arrow') ||
+      isBackKey(event)
+    );
   }
 
   updateRoute() {
@@ -570,11 +611,17 @@ body {
   will-change: transform;
 }
 
-.tv-featured:has(.tv-play-btn:focus-visible),
-.tv-featured:has(.tv-play-btn:hover),
-.tv-tile:hover,
-.tv-tile:focus-visible,
-.tv-tile--focused {
+body.tv-input-dpad .tv-featured:has(.tv-play-btn:focus-visible),
+body.tv-input-dpad .tv-tile:focus-visible,
+body.tv-input-dpad .tv-tile--focused {
+  border-color: rgba(65, 214, 141, 0.92);
+  box-shadow: 0 0 0 3px var(--tv-focus), 0 28px 70px rgba(0, 0, 0, 0.58);
+  outline: none;
+  transform: scale(1.03) translateY(-2px);
+}
+
+body.tv-input-pointer .tv-featured:has(.tv-play-btn:hover),
+body.tv-input-pointer .tv-tile:hover {
   border-color: rgba(65, 214, 141, 0.92);
   box-shadow: 0 0 0 3px var(--tv-focus), 0 28px 70px rgba(0, 0, 0, 0.58);
   outline: none;
@@ -591,8 +638,8 @@ body {
   background: linear-gradient(135deg, rgba(26, 36, 31, 0.98), rgba(18, 26, 21, 0.98));
 }
 
-.tv-play-btn:focus-visible,
-.tv-play-btn:hover {
+body.tv-input-dpad .tv-play-btn:focus-visible,
+body.tv-input-pointer .tv-play-btn:hover {
   box-shadow: 0 0 0 4px var(--tv-focus) !important;
   outline: none;
   transform: scale(1.04);

@@ -407,8 +407,14 @@ export default class SearchDialog extends Vue {
   padding: 20px 18px 18px;
 }
 
-.tv-search-result:hover,
-.tv-search-result:focus-visible {
+body.tv-input-pointer .tv-search-result:hover {
+  transform: scale(1.03) translateY(-2px);
+  border-color: rgba(65, 214, 141, 0.92);
+  box-shadow: 0 0 0 4px rgba(65, 214, 141, 0.5), 0 28px 70px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+
+body.tv-input-dpad .tv-search-result:focus-visible {
   transform: scale(1.03) translateY(-2px);
   border-color: rgba(65, 214, 141, 0.92);
   box-shadow: 0 0 0 4px rgba(65, 214, 141, 0.5), 0 28px 70px rgba(0, 0, 0, 0.5);
