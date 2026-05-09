@@ -115,6 +115,7 @@ export default class App extends Vue {
   featuredVideo: Video | null = null;
   newestVideos: Video[] = [];
   latestVideosTitle: string = '';
+  lastFocusedElement: HTMLElement | null = null;
 
   @State((state) => state.route.params.language) routeLanguage!: string;
 
@@ -258,6 +259,9 @@ export default class App extends Vue {
   }
 
   openVideo(video: Video) {
+    // remember last focused element so we can restore focus after closing video
+    this.lastFocusedElement =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
     this.setSelectedVideo(video);
     // When opening a video: set video language to English and subtitles to site language
     this.setVideoLanguage('en');
@@ -418,7 +422,18 @@ export default class App extends Vue {
         });
       }
       this.$nextTick(() => {
-        SpatialNavigation.focus(SECTION_MAIN);
+        // restore previously focused element in main section when video dialog closes
+        if (this.lastFocusedElement && document.contains(this.lastFocusedElement)) {
+          try {
+            this.lastFocusedElement.focus();
+            SpatialNavigation.focus(SECTION_MAIN, this.lastFocusedElement);
+          } catch (e) {
+            SpatialNavigation.focus(SECTION_MAIN);
+          }
+        } else {
+          SpatialNavigation.focus(SECTION_MAIN);
+        }
+        this.lastFocusedElement = null;
       });
     }
   }
