@@ -108,6 +108,7 @@ export default class App extends Vue {
   ready: boolean = false;
   featuredVideo: Video | null = null;
   newestVideos: Video[] = [];
+  latestVideosTitle: string = '';
   focusedSection: 'featured' | 'newest' = 'featured';
   focusedIndex: number = 0;
 
@@ -185,13 +186,12 @@ export default class App extends Vue {
   }
 
   get tSectionTitle() {
-    if (this.siteLanguage === 'nl') {
-      return 'Laatste videos';
-    }
-    if (this.siteLanguage === 'en') {
-      return 'Latest videos';
-    }
-    return this.translations.lblRecentlyAdded || this.translations.hdgVideos || 'Newest videos';
+    return (
+      this.latestVideosTitle ||
+      this.translations.lblRecentlyAdded ||
+      this.translations.hdgVideos ||
+      'Newest videos'
+    );
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -450,8 +450,9 @@ export default class App extends Vue {
   }
 
   async fetchLatestVideos() {
-    type CategoryRequest = { category: { media: Video[] } };
+    type CategoryRequest = { category: { name?: string; media: Video[] } };
     const { category } = (await axios.get<CategoryRequest>(this.latestVideosUrl)).data;
+    this.latestVideosTitle = category?.name ?? '';
     const latestMedia = category?.media ?? [];
     this.featuredVideo = latestMedia[0] ?? null;
     this.newestVideos = latestMedia.slice(1, 13);
