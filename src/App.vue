@@ -502,6 +502,11 @@ body {
   align-items: flex-end;
   display: flex;
   justify-content: space-between;
+  margin-inline: clamp(24px, 4vw, 44px);
+}
+
+.col-xl-10:has(> .tv-header) {
+  padding-inline: 0 !important;
 }
 
 .tv-title {
@@ -638,7 +643,6 @@ body {
   font-size: 1rem;
   letter-spacing: 0.04em;
   margin-bottom: 12px;
-  text-transform: uppercase;
 }
 
 .tv-featured-title {
@@ -699,7 +703,6 @@ body {
   font-size: 0.95rem;
   margin-bottom: 8px;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
 }
 
 .tv-newest-title {
@@ -762,10 +765,6 @@ body {
 
   .tv-featured-content {
     justify-content: start;
-  }
-
-  .tv-header {
-    margin-bottom: -60px;
   }
 }
 </style>
