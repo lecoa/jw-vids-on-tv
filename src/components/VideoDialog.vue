@@ -66,17 +66,7 @@ import Plyr, { Track } from 'plyr';
 
 import { Language, Video } from '@/types';
 
-import CastButton from './button/CastButton.vue';
-import VideoButton from './button/VideoButton.vue';
-import SubtitleButton from './button/SubtitleButton.vue';
-
-@Component({
-  components: {
-    CastButton,
-    VideoButton,
-    SubtitleButton,
-  },
-})
+@Component
 export default class VideoDialog extends Vue {
   player: Plyr | null = null;
   loading: boolean = true;
