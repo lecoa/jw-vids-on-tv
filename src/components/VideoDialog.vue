@@ -257,6 +257,7 @@ export default class VideoDialog extends Vue {
     if (video === null) {
       return;
     }
+    this.setSubtitleLanguage(this.getSiteLanguage.locale);
     this.videoMedia = null;
     this.subtitleMedia = null;
     if (this.getSiteLanguage.locale === this.videoLanguage) {

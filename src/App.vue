@@ -440,6 +440,7 @@ export default class App extends Vue {
   @Watch('siteLanguage')
   onSiteLanguageChange() {
     (this.$refs.langSelect as { blur?: () => void } | undefined)?.blur?.();
+    this.setSubtitleLanguage(this.siteLanguage);
     this.updateRoute();
     this.fetchI18n();
     this.fetchLatestVideos();
