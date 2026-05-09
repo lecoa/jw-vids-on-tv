@@ -39,7 +39,13 @@
                   <div class="tv-featured-meta">{{ featuredVideo.durationFormattedMinSec }}</div>
                   <h2 class="tv-featured-title">{{ featuredVideo.title }}</h2>
                   <div class="text-start">
-                    <v-btn color="primary" rounded="xl" @click.stop="openVideo(featuredVideo)">
+                    <v-btn
+                      color="primary"
+                      rounded="xl"
+                      @click.stop="openVideo(featuredVideo)"
+                      tabindex="0"
+                      class="tv-play-btn"
+                    >
                       <v-icon left>mdi-play</v-icon>
                       {{ translations.lblPlay || 'Play' }}
                     </v-btn>
@@ -58,15 +64,10 @@
             <h3 class="tv-section-title">{{ tSectionTitle }}</h3>
             <div class="tv-grid">
               <v-card
-                v-for="(video, index) in newestVideos"
-                ref="newestCards"
+                v-for="video in newestVideos"
                 :key="video.guid"
                 class="tv-tile tv-newest"
-                :class="{
-                  'tv-tile--focused': focusedSection === 'newest' && focusedIndex === index,
-                }"
                 tabindex="0"
-                @focus="onNewestFocus(index)"
                 @click="openVideo(video)"
                 @keydown.enter.prevent="openVideo(video)"
               >
@@ -91,12 +92,16 @@
 import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Getter, Mutation, State } from 'vuex-class';
+// @ts-ignore
+import SpatialNavigation from 'js-spatial-navigation';
 
 import VideoDialog from '@/components/VideoDialog.vue';
 import SearchDialog from '@/components/SearchDialog.vue';
 import TranscriptDialog from '@/components/TranscriptDialog.vue';
-import { isBackKey, isRemoteNavigationKey } from '@/utils/remote-navigation';
+import { isBackKey } from '@/utils/remote-navigation';
 import { Language, Translations, Video } from './types';
+
+const SECTION_MAIN = 'sn-main';
 
 @Component({
   components: {
@@ -110,8 +115,6 @@ export default class App extends Vue {
   featuredVideo: Video | null = null;
   newestVideos: Video[] = [];
   latestVideosTitle: string = '';
-  focusedSection: 'featured' | 'newest' = 'featured';
-  focusedIndex: number = 0;
 
   @State((state) => state.route.params.language) routeLanguage!: string;
 
@@ -149,13 +152,21 @@ export default class App extends Vue {
       this.updateRoute();
     }
 
-    window.addEventListener('keydown', this.onGlobalKeydown);
-    this.$nextTick(() => {
-      this.focusCurrentTile();
+    // Initialize spatial navigation
+    SpatialNavigation.init();
+    SpatialNavigation.add(SECTION_MAIN, {
+      selector: '[tabindex="0"]',
+      enterTo: 'last-visited',
+      rememberSource: true,
     });
+    SpatialNavigation.focus(SECTION_MAIN);
+
+    // Setup global key handler for back button and dialog toggling
+    window.addEventListener('keydown', this.onGlobalKeydown);
   }
 
   beforeDestroy() {
+    SpatialNavigation.destroy();
     window.removeEventListener('keydown', this.onGlobalKeydown);
   }
 
@@ -219,29 +230,6 @@ export default class App extends Vue {
   set subtitleLanguage(language: string) {
     if (language === null) return;
     this.setSubtitleLanguage(language);
-  }
-
-  get newestCardRefs() {
-    const refs = this.$refs.newestCards;
-    if (!refs) {
-      return [];
-    }
-    return Array.isArray(refs) ? refs : [refs];
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  static getColsPerRow(): number {
-    const width = window.innerWidth;
-    if (width >= 1260) {
-      return 4; // xl breakpoint and up
-    }
-    if (width >= 960) {
-      return 3; // lg breakpoint
-    }
-    if (width >= 600) {
-      return 2; // md breakpoint
-    }
-    return 1; // xs breakpoint
   }
 
   // Vuetify refs resolve to Vue component instances; focus must be applied to the root element.
@@ -339,31 +327,6 @@ export default class App extends Vue {
     }
   }
 
-  onFeaturedFocus() {
-    this.focusedSection = 'featured';
-  }
-
-  onNewestFocus(index: number) {
-    this.focusedSection = 'newest';
-    this.focusedIndex = index;
-  }
-
-  focusCurrentTile() {
-    if (this.focusedSection === 'featured') {
-      const featuredCard = App.getFocusableElement(this.$refs.featuredCard);
-      featuredCard?.focus();
-      return;
-    }
-
-    const card = App.getFocusableElement(this.newestCardRefs[this.focusedIndex]);
-    if (!card) {
-      return;
-    }
-
-    card.focus();
-    card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }
-
   onGlobalKeydown(event: KeyboardEvent) {
     if (isBackKey(event)) {
       if (this.transcriptDialog) {
@@ -386,69 +349,6 @@ export default class App extends Vue {
 
       this.$router.back();
       event.preventDefault();
-      return;
-    }
-
-    if (this.videoDialog || this.searchDialog || this.transcriptDialog || !this.ready) {
-      return;
-    }
-
-    if (!isRemoteNavigationKey(event)) {
-      return;
-    }
-
-    if (event.key === 'Enter') {
-      if (this.focusedSection === 'featured' && this.featuredVideo) {
-        this.openVideo(this.featuredVideo);
-      }
-      if (this.focusedSection === 'newest' && this.newestVideos[this.focusedIndex]) {
-        this.openVideo(this.newestVideos[this.focusedIndex]);
-      }
-      event.preventDefault();
-      return;
-    }
-
-    if (
-      this.focusedSection === 'featured' &&
-      event.key === 'ArrowDown' &&
-      this.newestVideos.length
-    ) {
-      this.focusedSection = 'newest';
-      this.focusedIndex = 0;
-      event.preventDefault();
-      this.$nextTick(() => this.focusCurrentTile());
-      return;
-    }
-
-    if (this.focusedSection === 'newest') {
-      if (event.key === 'ArrowUp') {
-        this.focusedSection = 'featured';
-        event.preventDefault();
-        this.$nextTick(() => this.focusCurrentTile());
-        return;
-      }
-      // For grid: use arrow keys to move within grid
-      const colsPerRow = App.getColsPerRow();
-      if (event.key === 'ArrowLeft') {
-        this.focusedIndex = Math.max(0, this.focusedIndex - 1);
-        event.preventDefault();
-        this.$nextTick(() => this.focusCurrentTile());
-        return;
-      }
-      if (event.key === 'ArrowRight') {
-        this.focusedIndex = Math.min(this.newestVideos.length - 1, this.focusedIndex + 1);
-        event.preventDefault();
-        this.$nextTick(() => this.focusCurrentTile());
-        return;
-      }
-      if (event.key === 'ArrowDown') {
-        const nextIndex = this.focusedIndex + colsPerRow;
-        if (nextIndex < this.newestVideos.length) {
-          this.focusedIndex = nextIndex;
-          event.preventDefault();
-          this.$nextTick(() => this.focusCurrentTile());
-        }
-      }
     }
   }
 
@@ -517,7 +417,9 @@ export default class App extends Vue {
           params: { language: this.siteLanguage },
         });
       }
-      this.$nextTick(() => this.focusCurrentTile());
+      this.$nextTick(() => {
+        SpatialNavigation.focus(SECTION_MAIN);
+      });
     }
   }
 }
@@ -611,6 +513,12 @@ body {
 .tv-featured {
   display: flex;
   overflow: hidden;
+}
+
+.tv-play-btn:focus-visible {
+  box-shadow: inset 0 0 0 2px white !important;
+  outline: none;
+  transform: scale(1.01);
 }
 
 .tv-featured-container {

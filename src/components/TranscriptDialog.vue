@@ -40,13 +40,13 @@
 import axios from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Mutation, State } from 'vuex-class';
+// @ts-ignore
+import SpatialNavigation from 'js-spatial-navigation';
 import { Language, Video } from '@/types';
-import {
-  clickActiveElement,
-  focusRelativeElement,
-  isEditableElement,
-  isRemoteNavigationKey,
-} from '@/utils/remote-navigation';
+import { isBackKey } from '@/utils/remote-navigation';
+
+const SECTION_TRANSCRIPT = 'sn-transcript';
+const SECTION_MAIN = 'sn-main';
 
 @Component
 export default class TranscriptDialog extends Vue {
@@ -58,6 +58,11 @@ export default class TranscriptDialog extends Vue {
   @Mutation setTranscriptDialog!: (value: boolean) => void;
 
   @State subtitleMedia!: Video | null;
+
+  // eslint-disable-next-line class-methods-use-this
+  beforeDestroy() {
+    SpatialNavigation.remove(SECTION_TRANSCRIPT);
+  }
 
   get xsOnly() {
     return this.$vuetify.breakpoint.xsOnly;
@@ -90,41 +95,47 @@ export default class TranscriptDialog extends Vue {
   }
 
   onRemoteKeydown(event: KeyboardEvent) {
-    const dialog = this.dialogElement;
-    if (!dialog) {
-      return;
-    }
-
-    const { activeElement } = document;
-    if (!dialog.contains(activeElement)) {
-      return;
-    }
-
-    if (!isRemoteNavigationKey(event)) {
-      return;
-    }
-
-    if (isEditableElement(activeElement)) {
-      return;
-    }
-
-    if (event.key === 'Enter') {
-      if (activeElement instanceof HTMLTextAreaElement) {
-        this.firstButton?.focus();
-        event.preventDefault();
-        return;
-      }
-
-      if (clickActiveElement(activeElement)) {
-        event.preventDefault();
-      }
-      return;
-    }
-
-    const direction: -1 | 1 = event.key === 'ArrowUp' || event.key === 'ArrowLeft' ? -1 : 1;
-    if (focusRelativeElement(dialog, activeElement as HTMLElement | null, direction)) {
+    // Handle back key to close dialog
+    if (isBackKey(event)) {
+      this.dialog = false;
       event.preventDefault();
+      return;
     }
+
+    // Spatial navigation handles navigation automatically
+    if (event.key === 'Enter') {
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement) {
+        focused.click();
+        event.preventDefault();
+      }
+    }
+  }
+
+  @Watch('transcriptDialog')
+  onTranscriptDialogChange(isOpen: boolean) {
+    if (!isOpen) {
+      SpatialNavigation.remove(SECTION_TRANSCRIPT);
+      SpatialNavigation.focus(SECTION_MAIN);
+      return;
+    }
+
+    // Setup spatial nav for transcript dialog
+    this.$nextTick(() => {
+      const dialog = this.dialogElement;
+      if (!dialog) return;
+
+      SpatialNavigation.add(SECTION_TRANSCRIPT, {
+        selector: '[tabindex="0"], button:not([disabled])',
+        enterTo: 'first-child',
+      });
+
+      const { firstButton } = this;
+      if (firstButton) {
+        firstButton.focus();
+        SpatialNavigation.focus(SECTION_TRANSCRIPT, firstButton);
+      }
+    });
   }
 
   @Watch('subtitleUrl')

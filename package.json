@@ -12,6 +12,7 @@
     "@types/node": "^18.11.18",
     "axios": "^0.24.0",
     "core-js": "^3.19.3",
+    "js-spatial-navigation": "^1.0.1",
     "plyr": "3.7.3",
     "source-map-js": "^1.0.2",
     "swiper": "^5.4.5",

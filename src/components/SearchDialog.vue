@@ -91,14 +91,13 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { Component, Vue, Watch } from 'vue-property-decorator';
 import { Getter, Mutation, State } from 'vuex-class';
+// @ts-ignore
+import SpatialNavigation from 'js-spatial-navigation';
 import { Language, Result, SearchResponse, Translations, Video } from '@/types';
-import {
-  clickActiveElement,
-  focusRelativeElement,
-  getFocusableElements,
-  isEditableElement,
-  isRemoteNavigationKey,
-} from '@/utils/remote-navigation';
+import { isBackKey } from '@/utils/remote-navigation';
+
+const SECTION_SEARCH = 'sn-search';
+const SECTION_MAIN = 'sn-main';
 
 @Component
 export default class SearchDialog extends Vue {
@@ -127,6 +126,11 @@ export default class SearchDialog extends Vue {
 
   async mounted() {
     this.fetchToken();
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  beforeDestroy() {
+    SpatialNavigation.remove(SECTION_SEARCH);
   }
 
   async fetchToken() {
@@ -212,79 +216,49 @@ export default class SearchDialog extends Vue {
     return this.$el.querySelector('input') as HTMLInputElement | null;
   }
 
-  get resultCards() {
-    const dialog = this.dialogElement;
-    if (!dialog) {
-      return [];
-    }
-
-    return getFocusableElements(dialog).filter((element) => element.matches('.v-card'));
-  }
-
-  focusSearchInput() {
-    this.searchInputElement?.focus();
-  }
-
-  focusFirstResult() {
-    const firstResult = this.resultCards[0];
-    if (firstResult) {
-      firstResult.focus();
-      return true;
-    }
-
-    return false;
-  }
-
   onRemoteKeydown(event: KeyboardEvent) {
-    const dialog = this.dialogElement;
-    if (!dialog) {
-      return;
-    }
-
-    const { activeElement } = document;
-    if (!dialog.contains(activeElement)) {
-      return;
-    }
-
-    if (!isRemoteNavigationKey(event)) {
-      return;
-    }
-
-    if (isEditableElement(activeElement)) {
-      if (event.key === 'ArrowDown') {
-        if (this.focusFirstResult()) {
-          event.preventDefault();
-        }
-        return;
-      }
-
-      if (event.key === 'ArrowUp') {
-        this.focusSearchInput();
-        event.preventDefault();
-        return;
-      }
-
-      if (event.key === 'Enter') {
-        if (this.focusFirstResult()) {
-          event.preventDefault();
-        }
-        return;
-      }
-
-      return;
-    }
-
-    if (event.key === 'Enter') {
-      if (clickActiveElement(activeElement)) {
-        event.preventDefault();
-      }
-      return;
-    }
-
-    const direction: -1 | 1 = event.key === 'ArrowUp' || event.key === 'ArrowLeft' ? -1 : 1;
-    if (focusRelativeElement(dialog, activeElement as HTMLElement | null, direction)) {
+    // Handle back key to close dialog
+    if (isBackKey(event)) {
+      this.dialog = false;
       event.preventDefault();
+      return;
     }
+
+    // Spatial navigation handles arrow key navigation automatically
+    // Just let the event propagate for Enter key
+    if (event.key === 'Enter') {
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement) {
+        focused.click();
+        event.preventDefault();
+      }
+    }
+  }
+
+  @Watch('searchDialog')
+  onSearchDialogChange(isOpen: boolean) {
+    if (!isOpen) {
+      SpatialNavigation.remove(SECTION_SEARCH);
+      SpatialNavigation.focus(SECTION_MAIN);
+      return;
+    }
+
+    // Setup spatial nav for search dialog
+    this.$nextTick(() => {
+      const dialog = this.dialogElement;
+      if (!dialog) return;
+
+      SpatialNavigation.add(SECTION_SEARCH, {
+        selector: '[tabindex="0"], input:not([readonly])',
+        enterTo: 'first-child',
+      });
+
+      const searchInput = this.searchInputElement;
+      if (searchInput) {
+        searchInput.focus();
+        SpatialNavigation.focus(SECTION_SEARCH, searchInput);
+      }
+    });
   }
 
   @Watch('searchQuery')
