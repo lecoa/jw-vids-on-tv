@@ -293,8 +293,11 @@ export default class VideoDialog extends Vue {
 
 .plyr {
   height: 100%;
-  --plyr-font-size-xlarge: 36px;
-  --plyr-font-size-large: 22px;
+  --plyr-font-size-xlarge: 42px;
+  --plyr-font-size-large: 26px;
+  --plyr-control-spacing: 18px;
+  --plyr-control-padding: 16px;
+  --plyr-control-icon-size: 24px;
   --plyr-color-main: #4aa750;
 }
 

@@ -1,7 +1,7 @@
 <template>
-  <v-app id="inspire" class="tv-app" style="background-color: #1c1b1b">
+  <v-app id="inspire" class="tv-app" style="background-color: rgb(10, 12, 12)">
     <v-main class="tv-main">
-      <v-container class="tv-shell" fluid style="background-color: #1c1b1b">
+      <v-container class="tv-shell" fluid style="background-color: rgb(10, 12, 12)">
         <v-row justify="center" class="tv-header-wrapper">
           <v-col cols="12" xl="10">
             <header class="tv-header">
@@ -16,7 +16,7 @@
                   :items="languages"
                   class="tv-language"
                   hide-details
-                  prepend-icon="mdi-language"
+                  prepend-icon="mdi-subtitles"
                   :item-text="languageLabel"
                   item-value="locale"
                   outlined
@@ -31,7 +31,7 @@
           <v-col cols="12" xl="10">
             <v-card
               ref="featuredCard"
-              class="tv-tile tv-featured"
+              class="tv-featured"
               style="box-shadow: none; outline: none; border: none"
             >
               <div class="tv-featured-container">
@@ -440,6 +440,22 @@ export default class App extends Vue {
 }
 </script>
 <style lang="scss">
+:root {
+  color-scheme: dark;
+  --tv-bg: #101112;
+  --tv-surface: rgba(26, 31, 36, 0.96);
+  --tv-surface-strong: #20262c;
+  --tv-accent: #41d68d;
+  --tv-accent-soft: rgba(65, 214, 141, 0.18);
+  --tv-focus: rgba(65, 214, 141, 0.55);
+  --tv-text: #f5f7f8;
+  --tv-text-muted: rgba(245, 247, 248, 0.74);
+  --tv-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --tv-radius-lg: 28px;
+  --tv-radius-md: 20px;
+  --tv-radius-sm: 16px;
+}
+
 * {
   scrollbar-width: thin;
 }
@@ -447,7 +463,9 @@ export default class App extends Vue {
 html {
   min-height: 100%;
   overflow-x: hidden;
-  background: #1c1b1b;
+  background: radial-gradient(circle at top, rgba(65, 214, 141, 0.12), transparent 36%),
+    linear-gradient(180deg, #101112 0%, #14181d 42%, #101112 100%);
+  font-size: 18px;
 }
 
 body {
@@ -455,6 +473,7 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  background: transparent;
 }
 
 .v-main {
@@ -468,15 +487,15 @@ body {
 }
 
 .tv-app {
-  background: #1c1b1b;
+  background: transparent;
 }
 
 .tv-main {
-  color: #f2f2f2;
+  color: var(--tv-text);
 }
 
 .tv-shell {
-  padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  padding: clamp(32px, 4vw, 72px) clamp(20px, 4vw, 56px) calc(56px + env(safe-area-inset-bottom));
 }
 
 .tv-header {
@@ -502,38 +521,76 @@ body {
 .tv-actions {
   align-items: center;
   display: flex;
-  gap: 8px;
+  gap: 14px;
 }
 
 .tv-language {
-  max-width: 240px;
-  min-width: 220px;
+  max-width: 320px;
+  min-width: 280px;
 }
 
+.tv-actions :deep(.v-btn),
+.tv-actions :deep(.v-input) {
+  border-radius: var(--tv-radius-sm);
+  font-size: 1rem;
+}
+
+.tv-actions :deep(.v-btn) {
+  min-height: 58px;
+  padding-inline: 22px;
+}
+
+.tv-actions :deep(.v-input__slot) {
+  min-height: 58px !important;
+}
+
+.tv-actions :deep(.v-label),
+.tv-actions :deep(.v-select__selection),
+.tv-actions :deep(input) {
+  font-size: 1rem;
+}
+
+.tv-actions :deep(.v-icon) {
+  font-size: 1.5rem;
+}
+
+.tv-featured,
 .tv-tile {
-  border: 2px solid transparent;
-  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--tv-radius-lg);
   overflow: hidden;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  box-shadow: var(--tv-shadow);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease,
+    background-color 180ms ease;
+  will-change: transform;
 }
 
+.tv-featured:has(.tv-play-btn:focus-visible),
+.tv-featured:has(.tv-play-btn:hover),
+.tv-tile:hover,
 .tv-tile:focus-visible,
 .tv-tile--focused {
-  border-color: #4aa750;
-  box-shadow: 0 0 0 3px rgba(74, 109, 167, 0.35);
+  border-color: rgba(65, 214, 141, 0.92);
+  box-shadow: 0 0 0 3px var(--tv-focus), 0 28px 70px rgba(0, 0, 0, 0.58);
   outline: none;
-  transform: scale(1.02);
+  transform: scale(1.03) translateY(-2px);
+}
+
+.tv-tile:active {
+  transform: scale(0.99);
 }
 
 .tv-featured {
   display: flex;
   overflow: hidden;
+  background: linear-gradient(135deg, rgba(26, 36, 31, 0.98), rgba(18, 26, 21, 0.98));
 }
 
-.tv-play-btn:focus-visible {
-  box-shadow: inset 0 0 0 2px white !important;
+.tv-play-btn:focus-visible,
+.tv-play-btn:hover {
+  box-shadow: 0 0 0 4px var(--tv-focus) !important;
   outline: none;
-  transform: scale(1.01);
+  transform: scale(1.04);
 }
 
 .tv-featured-container {
@@ -547,7 +604,9 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  background-color: #1c1b1b;
+  background: linear-gradient(180deg, rgba(16, 18, 16, 0.16), rgba(16, 18, 17, 0.88)),
+    linear-gradient(135deg, rgba(26, 36, 29, 0.92), rgba(20, 28, 25, 0.98));
+  padding: clamp(24px, 4vw, 44px);
 }
 
 .tv-featured-image-wrapper {
@@ -569,46 +628,51 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(at right top, rgba(28, 27, 27, 0.1) 0%, rgba(28, 27, 27, 1) 85%);
+  background: radial-gradient(at right top, rgba(16, 18, 17, 0.08) 0%, rgba(16, 18, 17, 0.98) 88%);
   pointer-events: none;
   z-index: 1;
 }
 
 .tv-featured-meta {
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 0.95rem;
-  margin-bottom: 8px;
+  color: var(--tv-text-muted);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
 }
 
 .tv-featured-title {
-  font-size: clamp(1.5rem, 3vw, 2.8rem);
-  line-height: 1.12;
-  margin: 0 0 12px 0;
+  font-size: clamp(2.2rem, 4vw, 4.25rem);
+  line-height: 1.02;
+  margin: 0 0 20px 0;
   text-wrap: balance;
+  max-width: 14ch;
 }
 
 .tv-featured-description {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   line-clamp: 3;
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(245, 247, 248, 0.88);
   display: -webkit-box;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   max-width: 72ch;
   overflow: hidden;
+  font-size: 1.02rem;
 }
 
 .tv-section-title {
-  color: rgba(255, 255, 255, 0.95);
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
-  letter-spacing: 0.02em;
-  margin-bottom: 16px;
+  color: var(--tv-text);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  letter-spacing: 0.03em;
+  margin-bottom: 20px;
+  text-transform: uppercase;
 }
 
 .tv-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 22px;
 }
 
 .tv-newest {
@@ -622,8 +686,8 @@ body {
 }
 
 .tv-newest-meta {
-  padding: 12px 14px 14px;
-  background: rgba(20, 20, 20, 0.7);
+  padding: 18px 20px 20px;
+  background: linear-gradient(180deg, rgba(24, 32, 28, 0.9), rgba(18, 25, 20, 0.96));
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -631,9 +695,11 @@ body {
 }
 
 .tv-newest-time {
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.85rem;
-  margin-bottom: 4px;
+  color: var(--tv-text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .tv-newest-title {
@@ -642,23 +708,23 @@ body {
   line-clamp: 2;
   color: #ffffff;
   display: -webkit-box;
-  font-size: 1rem;
-  line-height: 1.3;
+  font-size: 1.1rem;
+  line-height: 1.35;
   overflow: hidden;
   font-weight: 500;
 }
 
 @media (min-width: 960px) {
   .tv-featured-container {
-    min-height: 420px;
+    min-height: 520px;
   }
 
   .tv-grid {
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   }
 
   .tv-header-wrapper {
-    margin-bottom: -85px;
+    margin-bottom: -110px;
     z-index: 100;
     position: relative;
   }
@@ -668,7 +734,7 @@ body {
   .tv-header {
     align-items: flex-start;
     flex-direction: column;
-    gap: 16px;
+    gap: 18px;
   }
 
   .tv-actions {
@@ -683,16 +749,15 @@ body {
 
   .tv-featured-content {
     order: 2;
-    padding: clamp(16px, 3vw, 24px);
   }
 
   .tv-featured-image-wrapper {
     order: 1;
-    min-height: 280px;
+    min-height: 340px;
   }
 
   .tv-grid {
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   }
 
   .tv-featured-content {
@@ -700,7 +765,7 @@ body {
   }
 
   .tv-header {
-    margin-bottom: -50px;
+    margin-bottom: -60px;
   }
 }
 </style>

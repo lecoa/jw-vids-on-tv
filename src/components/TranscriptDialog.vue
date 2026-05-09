@@ -8,8 +8,8 @@
     :fullscreen="$vuetify.breakpoint.smAndDown"
     scrollable
   >
-    <v-card ref="dialogCard" @keydown="onRemoteKeydown">
-      <v-toolbar color="primary" dark dense class="flex-grow-0">
+    <v-card ref="dialogCard" class="tv-transcript-dialog" @keydown="onRemoteKeydown">
+      <v-toolbar color="primary" dark class="flex-grow-0 tv-transcript-toolbar">
         <v-toolbar-title>Transcript</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
@@ -22,7 +22,7 @@
         </v-toolbar-items>
       </v-toolbar>
 
-      <v-card-text class="pa-4">
+      <v-card-text class="pa-6 tv-transcript-body">
         <v-textarea
           :value="subtitles"
           outlined
@@ -178,3 +178,45 @@ export default class TranscriptDialog extends Vue {
   }
 }
 </script>
+<style lang="scss">
+.tv-transcript-dialog {
+  background: linear-gradient(180deg, rgba(20, 24, 28, 0.98), rgba(13, 15, 17, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 28px;
+  box-shadow: 0 32px 88px rgba(0, 0, 0, 0.6);
+}
+
+.tv-transcript-toolbar {
+  min-height: 72px;
+  padding-inline: 18px;
+}
+
+.tv-transcript-toolbar :deep(.v-toolbar__title) {
+  font-size: 1.15rem;
+}
+
+.tv-transcript-toolbar :deep(.v-btn) {
+  width: 56px;
+  height: 56px;
+}
+
+.tv-transcript-toolbar :deep(.v-icon) {
+  font-size: 1.5rem;
+}
+
+.tv-transcript-body :deep(.v-input__slot) {
+  min-height: 420px !important;
+  border-radius: 20px;
+}
+
+.tv-transcript-body :deep(textarea) {
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 959px) {
+  .tv-transcript-dialog {
+    border-radius: 0;
+  }
+}
+</style>

@@ -7,7 +7,7 @@
     :fullscreen="$vuetify.breakpoint.smAndDown"
     scrollable
   >
-    <v-card ref="dialogCard" @keydown="onRemoteKeydown">
+    <v-card ref="dialogCard" class="tv-search-dialog" @keydown="onRemoteKeydown">
       <v-toolbar color="primary" dark class="flex-grow-0">
         <v-text-field
           ref="searchInput"
@@ -21,7 +21,7 @@
           color="white"
           clearable
           autofocus
-          class="mr-3"
+          class="mr-3 tv-search-input"
         ></v-text-field>
         <v-toolbar-items>
           <v-btn icon @click="dialog = false">
@@ -58,14 +58,21 @@
           </v-row>
           <v-row v-if="response">
             <v-col v-for="result in response.results" :key="result.lank" sm="6" lg="4" cols="12">
-              <v-card hover ripple rounded tabindex="0" @click="onClickResult(result)">
+              <v-card
+                class="tv-search-result tv-tile"
+                hover
+                ripple
+                rounded
+                tabindex="0"
+                @click="onClickResult(result)"
+              >
                 <v-img
                   :src="result.image.url"
                   :aspect-ratio="2 / 1"
-                  class="white--text align-end"
+                  class="white--text align-end tv-search-result-image"
                   gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                 >
-                  <v-card-title style="word-break: normal; user-select: none">
+                  <v-card-title class="tv-search-result-title">
                     {{ result.title }}
                   </v-card-title>
                 </v-img>
@@ -353,3 +360,64 @@ export default class SearchDialog extends Vue {
   }
 }
 </script>
+<style lang="scss">
+.tv-search-dialog {
+  background: linear-gradient(180deg, rgba(20, 24, 28, 0.98), rgba(13, 15, 17, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 28px;
+  box-shadow: 0 32px 88px rgba(0, 0, 0, 0.6);
+}
+
+.tv-search-input {
+  max-height: 64px;
+}
+
+.tv-search-dialog :deep(.v-toolbar__content) {
+  min-height: 72px;
+  padding-inline: 20px;
+}
+
+.tv-search-dialog :deep(.v-input__slot) {
+  min-height: 56px !important;
+  border-radius: 16px;
+}
+
+.tv-search-dialog :deep(input) {
+  font-size: 1rem;
+}
+
+.tv-search-result {
+  background: linear-gradient(180deg, rgba(28, 33, 38, 0.96), rgba(18, 22, 26, 0.98));
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.35);
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.tv-search-result-image {
+  min-height: 210px;
+}
+
+.tv-search-result-title {
+  word-break: normal;
+  user-select: none;
+  font-size: 1.1rem;
+  line-height: 1.3;
+  padding: 20px 18px 18px;
+}
+
+.tv-search-result:hover,
+.tv-search-result:focus-visible {
+  transform: scale(1.03) translateY(-2px);
+  border-color: rgba(65, 214, 141, 0.92);
+  box-shadow: 0 0 0 4px rgba(65, 214, 141, 0.5), 0 28px 70px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+
+@media (max-width: 959px) {
+  .tv-search-dialog {
+    border-radius: 0;
+  }
+}
+</style>
